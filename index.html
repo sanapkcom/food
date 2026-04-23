@@ -4,19 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CheapEats - Find Cheap Food Near You</title>
+    <title>EATSPOT - Find Food Spots Near You</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script src="config.js"></script>
-
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
-
 </head>
-
 
 <body>
     <nav class="navbar">
@@ -38,18 +34,13 @@
 
     <section id="home" class="hero">
         <div class="container">
-            <h2>Delicious food, delivered fast</h2>
-            <p>Order from your favorite local spots</p>
-            <div class="search-container">
-                <div class="search-bar">
-                    <input type="text" placeholder="Search for food, restaurants, or cuisines..." id="search-input">
-                    <button class="search-btn" id="search-btn">🔍</button>
-                </div>
-            </div>
-            <button id="find-food-btn" class="btn-primary location-btn" onclick="findFood()">
-                <span class="btn-icon">📍</span>
-                Find cheap food near me
-            </button>
+            <h2>EATSPOT</h2>
+            <p>Discover food spots, explore restaurants, and find what matches your taste.</p>
+
+            <a href="#explore" class="hero-explore-link">
+                <button class="btn-primary">Explore Food Spots</button>
+            </a>
+
             <div id="results"></div>
             <div id="map" style="height: 400px; width: 100%; margin-top: 20px; display: none;"></div>
         </div>
@@ -57,28 +48,71 @@
 
     <section id="explore" class="explore">
         <div class="container">
+            <h3 class="explore-title">Explore Food Spots</h3>
+            <p class="explore-subtitle">Search and filter restaurants the way you want</p>
 
+            <div class="explore-search-wrapper">
+                <div class="advanced-search-box">
+                    <div class="search-field">
+                        <label for="search-input">Food Spot</label>
+                        <input type="text" id="search-input" placeholder="Search restaurant or place name">
+                    </div>
 
-            <div class="filters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="50">Under ₹50</button>
-                <button class="filter-btn" data-filter="100">Under ₹100</button>
-                <button class="filter-btn" data-filter="150">Under ₹150</button>
+                    <div class="search-field">
+                        <label for="food-type">Food Type</label>
+                        <select id="food-type">
+                            <option value="">All Food Types</option>
+                            <option value="biryani">Biryani</option>
+                            <option value="mandhi">Mandhi</option>
+                            <option value="shawarma">Shawarma</option>
+                            <option value="alfaham">Alfaham</option>
+                            <option value="broast">Broast</option>
+                            <option value="meals">Meals</option>
+                            <option value="bakery">Bakery</option>
+                            <option value="juice">Juice</option>
+                            <option value="cafe">Cafe</option>
+                        </select>
+                    </div>
+
+                    <div class="search-field">
+                        <label for="price-range">Price Range</label>
+                        <select id="price-range">
+                            <option value="">Any Price</option>
+                            <option value="0-100">Under ₹100</option>
+                            <option value="100-250">₹100 - ₹250</option>
+                            <option value="250-500">₹250 - ₹500</option>
+                            <option value="500+">Above ₹500</option>
+                        </select>
+                    </div>
+
+                    <div class="search-field">
+                        <label for="distance">Distance</label>
+                        <select id="distance">
+                            <option value="">Any Distance</option>
+                            <option value="1">Under 1 km</option>
+                            <option value="3">Under 3 km</option>
+                            <option value="5">Under 5 km</option>
+                            <option value="10">Under 10 km</option>
+                        </select>
+                    </div>
+
+                    <button class="hero-search-btn" id="search-btn">Search</button>
+                </div>
             </div>
-
-
 
             <div class="sections">
                 <div class="section active" id="meals-100">
-                    <h3>Meals under ₹100</h3>
+                    <h3>Popular Food Spots</h3>
                     <div class="places-grid" id="meals-100-grid"></div>
                 </div>
+
                 <div class="section" id="hidden-gems">
-                    <h3>Hidden Gems</h3>
+                    <h3>Recommended Places</h3>
                     <div class="places-grid" id="hidden-gems-grid"></div>
                 </div>
+
                 <div class="section" id="student-offers">
-                    <h3>Student Offers</h3>
+                    <h3>More Restaurants</h3>
                     <div class="places-grid" id="student-offers-grid"></div>
                 </div>
             </div>
@@ -102,9 +136,10 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 CheapEats. Contact: info@cheapeats.com</p>
+            <p>&copy; 2024 EATSPOT. Discover food spots near you.</p>
         </div>
     </footer>
+
     <script src="script.js"></script>
 </body>
 
