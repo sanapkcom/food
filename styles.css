@@ -1207,3 +1207,124 @@ form button {
         background: white !important;
     }
 }
+/* ===== NEW EXPLORE SEARCH UI (RAFA PART) ===== */
+
+.hero-explore-link {
+    text-decoration: none;
+}
+
+.explore-title {
+    text-align: center;
+    font-size: 2.3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.explore-subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+.explore-search-wrapper {
+    margin: 2rem 0 3rem;
+}
+
+/* MAIN SEARCH BOX */
+.advanced-search-box {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+    background: white;
+    padding: 22px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(136, 151, 108, 0.12);
+    border: 1px solid rgba(136, 151, 108, 0.12);
+}
+
+/* EACH FIELD */
+.search-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.search-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+/* INPUT + SELECT */
+.search-field input,
+.search-field select {
+    width: 100%;
+    height: 52px;
+    padding: 0 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-family: 'Poppins', sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.search-field input:focus,
+.search-field select:focus {
+    border-color: #88976c;
+    box-shadow: 0 0 0 4px rgba(136, 151, 108, 0.1);
+    background: white;
+}
+
+/* SEARCH BUTTON */
+.hero-search-btn {
+    height: 52px;
+    padding: 0 24px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #88976c 0%, #728156 100%);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(136, 151, 108, 0.3);
+}
+
+.hero-search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(136, 151, 108, 0.4);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .advanced-search-box {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .hero-search-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .advanced-search-box {
+        grid-template-columns: 1fr;
+        padding: 18px;
+        gap: 12px;
+    }
+
+    .search-field input,
+    .search-field select,
+    .hero-search-btn {
+        height: 48px;
+        font-size: 0.9rem;
+    }
+}
