@@ -28,8 +28,10 @@ function renderStars(rating) {
 // 🧾 Place card
 function createPlaceCard(place, index) {
     const deliveryTime = place.deliveryTime || (Math.floor(Math.random() * 20) + 15);
-    place.deliveryTime = deliveryTime; // fix it once per place
+    place.deliveryTime = deliveryTime;
+
     const imageUrl = place.image || 'https://via.placeholder.com/300x200?text=Food';
+
     const distance = typeof place.distance === 'number'
         ? place.distance.toFixed(1) + ' km'
         : place.distance || 'N/A';
@@ -42,16 +44,20 @@ function createPlaceCard(place, index) {
                     <span class="delivery-time">🕒 ${deliveryTime} min</span>
                 </div>
             </div>
+
             <div class="place-info">
-                <div class="card-header">
-                    <h4 class="place-name">${place.name}</h4>
-                    <div class="rating-container">
-                        <span class="rating-stars">${renderStars(place.rating || 0)}</span>
-                        <span class="rating-text">${place.rating || 'N/A'}</span>
-                    </div>
-                </div>
-                <p class="place-price cheapest-badge">Cheapest: ₹${place.min_price ?? place.minPrice}</p>
-                <p class="place-popular">Maximum rate ₹${place.max_price ?? place.maxPrice ?? 'N/A'}</p>
+                <h4 class="place-name">${place.name}</h4>
+
+                <p class="place-location">📍 ${place.location || 'Location not added'}</p>
+
+                <p class="place-popular">🍽️ Type: ${place.food_type || 'General'}</p>
+
+                <p class="place-description">🥘 Foods: ${place.foods_available || place.popular_item || 'Not added'}</p>
+
+                <p class="place-price price-range-badge">₹${place.min_price ?? place.minPrice} - ₹${place.max_price ?? place.maxPrice ?? 'N/A'}</p>
+
+                <p class="place-description">${place.description || ''}</p>
+
                 <div class="card-footer">
                     <span class="place-distance">📍 ${distance}</span>
                     <button class="btn-secondary" onclick="viewLocation('${place.name}')">
@@ -116,15 +122,16 @@ document.getElementById('add-place-form').addEventListener('submit', async (e) =
     e.preventDefault();
 
     const newPlace = {
-        name: document.getElementById('shop-name').value,
-        location: document.getElementById('location').value,
-        min_price: parseInt(document.getElementById('min-price').value),
-        max_price: parseInt(document.getElementById('max-price').value),
-        popular_item: document.getElementById('popular-item').value,
-        description: document.getElementById('description').value,
-        section: 'meals-100', // default section
-    };
-
+    name: document.getElementById('shop-name').value,
+    location: document.getElementById('location').value,
+    food_type: document.getElementById('food-type-input').value,
+    foods_available: document.getElementById('foods-available').value,
+    min_price: parseInt(document.getElementById('min-price').value),
+    max_price: parseInt(document.getElementById('max-price').value),
+    distance: parseFloat(document.getElementById('distance-input').value),
+    description: document.getElementById('description').value,
+    section: 'meals-100'
+};
     const { error } = await db.from('food_spots').insert([newPlace]);
 
     if (error) {
@@ -136,25 +143,75 @@ document.getElementById('add-place-form').addEventListener('submit', async (e) =
     }
 });
 
-// 🔍 Price filter buttons
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+// 🔍 Advanced search and sorting filters
+function applyAdvancedFilters() {
+    const searchText = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
+    const foodType = document.getElementById('food-type')?.value.toLowerCase().trim() || '';
+    const priceRange = document.getElementById('price-range')?.value || '';
+    const distanceLimit = document.getElementById('distance')?.value || '';
 
-        const filter = btn.dataset.filter;
-        if (filter === 'all') {
-            displayPlaces(allPlaces);
-        } else {
-            const limit = parseInt(filter);
-            const filtered = allPlaces.filter(p =>
-                (p.min_price ?? p.minPrice) <= limit
-            );
-            displayPlaces(filtered);
+    const filteredPlaces = allPlaces.filter(place => {
+        const name = (place.name || '').toLowerCase();
+        const location = (place.location || '').toLowerCase();
+        const foodTypeData = (place.food_type || '').toLowerCase();
+        const foodsAvailable = (place.foods_available || place.food_available || '').toLowerCase();
+        const popularItem = (place.popular_item || '').toLowerCase();
+        const description = (place.description || '').toLowerCase();
+
+        const minPrice = Number(place.min_price || 0);
+        const maxPrice = Number(place.max_price || minPrice);
+        const distance = Number(place.distance || 999);
+
+        const matchesSearch =
+            searchText === '' ||
+            name.includes(searchText) ||
+            location.includes(searchText) ||
+            foodTypeData.includes(searchText) ||
+            foodsAvailable.includes(searchText) ||
+            popularItem.includes(searchText) ||
+            description.includes(searchText);
+
+        const matchesFoodType =
+            foodType === '' ||
+            foodType === 'all' ||
+            foodTypeData.includes(foodType) ||
+            foodsAvailable.includes(foodType);
+
+        let matchesPrice = true;
+
+        if (priceRange === '0-100') {
+            matchesPrice = minPrice <= 100 || maxPrice <= 100;
+        } 
+        else if (priceRange === '100-250') {
+            matchesPrice = maxPrice >= 100 && minPrice <= 250;
+        } 
+        else if (priceRange === '250-500') {
+            matchesPrice = maxPrice >= 250 && minPrice <= 500;
+        } 
+        else if (priceRange === '500+') {
+            matchesPrice = maxPrice >= 500;
         }
-    });
-});
 
+        const matchesDistance =
+            distanceLimit === '' ||
+            distanceLimit === 'all' ||
+            distance <= Number(distanceLimit);
+
+        return matchesSearch && matchesFoodType && matchesPrice && matchesDistance;
+    });
+
+    displayPlaces(filteredPlaces);
+}
+// Search button click
+document.getElementById('search-btn')?.addEventListener('click', applyAdvancedFilters);
+
+// Search while typing
+document.getElementById('search-input')?.addEventListener('input', applyAdvancedFilters);
+
+// Filter when dropdown changes
+document.getElementById('food-type')?.addEventListener('change', applyAdvancedFilters);
+document.getElementById('price-range')?.addEventListener('change', applyAdvancedFilters);
+document.getElementById('distance')?.addEventListener('change', applyAdvancedFilters);
 // 📍 Find food near user
 function findFood() {
     if (navigator.geolocation) {
