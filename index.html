@@ -123,14 +123,35 @@
         <div class="container">
             <h3>Add a Place</h3>
             <form id="add-place-form">
-                <input type="text" id="shop-name" placeholder="Shop Name" required>
-                <input type="text" id="location" placeholder="Location" required>
-                <input type="number" id="min-price" placeholder="Minimum Food Price (₹)" required>
-                <input type="text" id="popular-item" placeholder="Popular Food Item" required>
-                <input type="number" id="max-price" placeholder="Maximum Item Price (₹)" required>
-                <textarea id="description" placeholder="Short Description" required></textarea>
-                <button type="submit" class="btn-primary">Submit</button>
-            </form>
+    <input type="text" id="shop-name" placeholder="Restaurant / Food Spot Name" required>
+
+    <input type="text" id="location" placeholder="Location" required>
+
+    <select id="food-type-input" required>
+        <option value="">Select Food Type</option>
+        <option value="bakery">Bakery</option>
+        <option value="tea">Tea</option>
+        <option value="meals">Meals</option>
+        <option value="biryani">Biryani</option>
+        <option value="mandhi">Mandhi</option>
+        <option value="juice">Juice</option>
+        <option value="cafe">Cafe</option>
+        <option value="shawarma">Shawarma</option>
+        <option value="broast">Broast</option>
+    </select>
+
+    <input type="text" id="foods-available" placeholder="Foods Available eg: tea, snacks, biryani" required>
+
+    <input type="number" id="min-price" placeholder="Minimum Price ₹" required>
+
+    <input type="number" id="max-price" placeholder="Maximum Price ₹" required>
+
+    <input type="number" id="distance-input" placeholder="Distance in km eg: 2.5" step="0.1" required>
+
+    <textarea id="description" placeholder="Short Description" required></textarea>
+
+    <button type="submit" class="btn-primary">Submit</button>
+</form>
         </div>
     </section>
 
