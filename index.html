@@ -20,7 +20,7 @@
         <div class="container">
             <h1 class="logo">🍽️ EATSPOT</h1>
             <div class="nav-right">
-                <div class="location-indicator">
+                <div class="location-indicator" onclick="findFood()" style="cursor: pointer;">
                     <span class="location-icon">📍</span>
                     <span class="location-text">Delhi, India</span>
                 </div>
@@ -43,6 +43,7 @@
                 <button class="btn-primary">Explore Food Spots</button>
             </a>
 
+            <div id="loading-spinner" style="display: none;"></div>
             <div id="results"></div>
             <div id="map" style="height: 400px; width: 100%; margin-top: 20px; display: none;"></div>
         </div>
@@ -99,6 +100,15 @@
                     </div>
 
                     <button class="hero-search-btn" id="search-btn">Search</button>
+                </div>
+            </div>
+
+            <div class="quick-filters">
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="50">Under ₹50</button>
+                    <button class="filter-btn" data-filter="100">Under ₹100</button>
+                    <button class="filter-btn" data-filter="150">Under ₹150</button>
                 </div>
             </div>
 

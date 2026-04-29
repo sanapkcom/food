@@ -68,7 +68,7 @@ function createPlaceCard(place, index) {
 }
 
 // 📦 Display sections
-function displayPlaces(places) {
+function displayPlaces(places, isFiltering = false) {
     const sortedPlaces = [...places].sort((a, b) =>
         (a.min_price ?? a.minPrice) - (b.min_price ?? b.minPrice)
     );
@@ -83,7 +83,16 @@ function displayPlaces(places) {
         const grid = document.getElementById(`${sectionId}-grid`);
         if (grid) {
             if (sections[sectionId].length === 0) {
-                grid.innerHTML = '<p style="color:#888; padding:1rem;">No places found.</p>';
+                if (isFiltering || document.getElementById('search-input')?.value.trim() !== '') {
+                    grid.innerHTML = '<div class="empty-state"><p>No spots found for your search 😔</p><p>Try a different name!</p></div>';
+                } else {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <p>🍽️ No spots here yet!</p>
+                            <p>Be the first to add one.</p>
+                        </div>
+                    `;
+                }
             } else {
                 grid.innerHTML = sections[sectionId]
                     .map((place, index) => createPlaceCard(place, index))
@@ -95,7 +104,10 @@ function displayPlaces(places) {
 
 // 🔄 Load from Supabase
 async function loadPlaces() {
+    const spinner = document.getElementById('loading-spinner');
+    if (spinner) spinner.style.display = 'block';
     const { data, error } = await db.from('food_spots').select('*');
+    if (spinner) spinner.style.display = 'none';
     if (error) {
         console.error('Error fetching places:', error);
         return;
@@ -221,14 +233,29 @@ document.getElementById('price-range')?.addEventListener('change', applyAdvanced
 document.getElementById('distance')?.addEventListener('change', applyAdvancedFilters);
 // 📍 Find food near user
 function findFood() {
+    const resultsDiv = document.getElementById('results');
+    if (resultsDiv) {
+        resultsDiv.innerHTML = '<p style="margin-top:1rem;">Searching for food spots near you...</p>';
+    }
+    const spinner = document.getElementById('loading-spinner');
+    if (spinner) spinner.style.display = 'block';
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition, showError);
     } else {
+        if (spinner) spinner.style.display = 'none';
         alert("Geolocation is not supported by your browser.");
+        if (resultsDiv) {
+            resultsDiv.innerHTML = '<p style="color:#888; margin-top:1rem;">Location access denied. Showing all spots instead.</p>';
+        }
+        displayPlaces(allPlaces);
     }
 }
 
 function showPosition(position) {
+    const spinner = document.getElementById('loading-spinner');
+    if (spinner) spinner.style.display = 'none';
+
     const userLat = position.coords.latitude;
     const userLng = position.coords.longitude;
 
@@ -243,13 +270,13 @@ function showPosition(position) {
 
     if (nearbyPlaces.length === 0) {
         document.getElementById('results').innerHTML =
-            '<p style="color:#888; margin-top:1rem;">No food spots found within 5km 😔</p>';
+            '<p style="color:#888; margin-top:1rem;">No spots found near you yet. Showing all spots instead.</p>';
+        displayPlaces(allPlaces);
     } else {
         document.getElementById('results').innerHTML =
-            `<p style="margin-top:1rem;">✅ Found <strong>${nearbyPlaces.length}</strong> spots near you!</p>`;
+            `<p style="margin-top:1rem;">✅ Found <strong>${nearbyPlaces.length}</strong> spots within 5km of you!</p>`;
+        displayPlaces(nearbyPlaces);
     }
-
-    displayPlaces(nearbyPlaces.length > 0 ? nearbyPlaces : allPlaces);
 
     if (typeof google !== 'undefined' && google.maps && nearbyPlaces.length > 0) {
         initMapForNearby(userLat, userLng, nearbyPlaces);
@@ -257,19 +284,14 @@ function showPosition(position) {
 }
 
 function showError(error) {
-    switch (error.code) {
-        case error.PERMISSION_DENIED:
-            alert("Location permission denied.");
-            break;
-        case error.POSITION_UNAVAILABLE:
-            alert("Location information unavailable.");
-            break;
-        case error.TIMEOUT:
-            alert("Location request timed out.");
-            break;
-        default:
-            alert("An unknown error occurred.");
+    const spinner = document.getElementById('loading-spinner');
+    if (spinner) spinner.style.display = 'none';
+
+    const resultsDiv = document.getElementById('results');
+    if (resultsDiv) {
+        resultsDiv.innerHTML = '<p style="color:#888; margin-top:1rem;">Location access denied. Showing all spots instead.</p>';
     }
+    displayPlaces(allPlaces);
 }
 
 // 📐 Haversine distance
@@ -324,6 +346,26 @@ function initMapForNearby(userLat, userLng, places) {
         marker.addListener('click', () => infoWindow.open(map, marker));
     });
 }
+
+// Price Filter Buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+
+        const filterValue = e.target.getAttribute('data-filter');
+        if (filterValue === 'all') {
+            displayPlaces(allPlaces);
+        } else {
+            const maxPrice = parseInt(filterValue);
+            const filtered = allPlaces.filter(place => {
+                const minPrice = Number(place.min_price || place.minPrice || 0);
+                return minPrice <= maxPrice;
+            });
+            displayPlaces(filtered, true);
+        }
+    });
+});
 
 // 🚀 Init
 loadPlaces();
