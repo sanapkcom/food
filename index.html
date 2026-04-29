@@ -11,6 +11,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    <script src="auth.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
 </head>
 
@@ -26,7 +27,8 @@
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
                     <li><a href="#explore">Explore</a></li>
-                    <li><a href="#add-place">Add Place</a></li>
+                    <li><a href="#add-place" id="nav-add-place">Add Place</a></li>
+                    <li id="auth-nav" style="display: flex; align-items: center;"></li>
                 </ul>
             </div>
         </div>
@@ -122,36 +124,46 @@
     <section id="add-place" class="add-place">
         <div class="container">
             <h3>Add a Place</h3>
-            <form id="add-place-form">
-    <input type="text" id="shop-name" placeholder="Restaurant / Food Spot Name" required>
+            <div id="add-place-container">
+                <form id="add-place-form">
+                    <input type="text" id="shop-name" placeholder="Restaurant / Food Spot Name" required>
 
-    <input type="text" id="location" placeholder="Location" required>
+                    <input type="text" id="location" placeholder="Location" required>
 
-    <select id="food-type-input" required>
-        <option value="">Select Food Type</option>
-        <option value="bakery">Bakery</option>
-        <option value="tea">Tea</option>
-        <option value="meals">Meals</option>
-        <option value="biryani">Biryani</option>
-        <option value="mandhi">Mandhi</option>
-        <option value="juice">Juice</option>
-        <option value="cafe">Cafe</option>
-        <option value="shawarma">Shawarma</option>
-        <option value="broast">Broast</option>
-    </select>
+                    <select id="food-type-input" required>
+                        <option value="">Select Food Type</option>
+                        <option value="bakery">Bakery</option>
+                        <option value="tea">Tea</option>
+                        <option value="meals">Meals</option>
+                        <option value="biryani">Biryani</option>
+                        <option value="mandhi">Mandhi</option>
+                        <option value="juice">Juice</option>
+                        <option value="cafe">Cafe</option>
+                        <option value="shawarma">Shawarma</option>
+                        <option value="broast">Broast</option>
+                    </select>
 
-    <input type="text" id="foods-available" placeholder="Foods Available eg: tea, snacks, biryani" required>
+                    <input type="text" id="foods-available" placeholder="Foods Available eg: tea, snacks, biryani"
+                        required>
 
-    <input type="number" id="min-price" placeholder="Minimum Price ₹" required>
+                    <input type="number" id="min-price" placeholder="Minimum Price ₹" required>
 
-    <input type="number" id="max-price" placeholder="Maximum Price ₹" required>
+                    <input type="number" id="max-price" placeholder="Maximum Price ₹" required>
 
-    <input type="number" id="distance-input" placeholder="Distance in km eg: 2.5" step="0.1" required>
+                    <input type="number" id="distance-input" placeholder="Distance in km eg: 2.5" step="0.1" required>
 
-    <textarea id="description" placeholder="Short Description" required></textarea>
+                    <textarea id="description" placeholder="Short Description" required></textarea>
 
-    <button type="submit" class="btn-primary">Submit</button>
-</form>
+                    <button type="submit" class="btn-primary">Submit</button>
+                </form>
+
+                <div id="login-prompt" class="login-prompt" style="display: none;">
+                    <span class="lock-icon">🔒</span>
+                    <h3>Want to add a food spot?</h3>
+                    <p>Login to contribute and help fellows to find cheap food near them!</p>
+                    <a href="auth.html" class="btn-primary">Login to Add a Spot</a>
+                </div>
+            </div>
         </div>
     </section>
 

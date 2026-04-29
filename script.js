@@ -1,6 +1,4 @@
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Store loaded places globally for filtering
 let allPlaces = [];
@@ -121,17 +119,26 @@ function viewLocation(name) {
 document.getElementById('add-place-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) {
+        alert('Please login to add a place.');
+        window.location.href = 'auth.html';
+        return;
+    }
+
     const newPlace = {
-    name: document.getElementById('shop-name').value,
-    location: document.getElementById('location').value,
-    food_type: document.getElementById('food-type-input').value,
-    foods_available: document.getElementById('foods-available').value,
-    min_price: parseInt(document.getElementById('min-price').value),
-    max_price: parseInt(document.getElementById('max-price').value),
-    distance: parseFloat(document.getElementById('distance-input').value),
-    description: document.getElementById('description').value,
-    section: 'meals-100'
-};
+        name: document.getElementById('shop-name').value,
+        location: document.getElementById('location').value,
+        food_type: document.getElementById('food-type-input').value,
+        foods_available: document.getElementById('foods-available').value,
+        min_price: parseInt(document.getElementById('min-price').value),
+        max_price: parseInt(document.getElementById('max-price').value),
+        distance: parseFloat(document.getElementById('distance-input').value),
+        description: document.getElementById('description').value,
+        section: 'meals-100',
+        user_id: user.id
+    };
+
     const { error } = await db.from('food_spots').insert([newPlace]);
 
     if (error) {
