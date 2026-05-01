@@ -30,9 +30,14 @@ function createPlaceCard(place, index) {
 
     const imageUrl = place.image || 'https://via.placeholder.com/300x200?text=Food';
 
-    const distance = typeof place.distance === 'number'
-        ? place.distance.toFixed(1) + ' km'
-        : place.distance || 'N/A';
+    let distance = place.distance;
+    if (typeof place.distance === 'number') {
+        distance = `${place.distance.toFixed(1)} km away`;
+    } else if (typeof place.distance === 'string' && place.distance.includes('km')) {
+        distance = place.distance;
+    } else if (!place.distance || place.distance === null) {
+        distance = 'Distance unknown';
+    }
 
     return `
         <div class="place-card" style="animation-delay: ${index * 0.1}s">
@@ -57,12 +62,14 @@ function createPlaceCard(place, index) {
                 <p class="place-description">${place.description || ''}</p>
 
                 <div class="card-footer">
-                    <span class="place-distance">📍 ${distance}</span>
+                    <span class="place-distance">📏 ${distance}</span>
                     <button class="btn-secondary" onclick="viewLocation('${place.name}')">
                         View Location 📍
                     </button>
                 </div>
+                <div class="added-by">🙋 Added by: ${place.added_by || 'Anonymous'}</div>
             </div>
+
         </div>
     `;
 }
@@ -138,17 +145,54 @@ document.getElementById('add-place-form').addEventListener('submit', async (e) =
         return;
     }
 
+    document.querySelectorAll('.field-error').forEach(el => el.remove());
+    document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+
+    let isValid = true;
+
+    const nameInput = document.getElementById('shop-name');
+    const locationInput = document.getElementById('location');
+    const foodTypeInput = document.getElementById('food-type-input');
+    const foodsAvailableInput = document.getElementById('foods-available');
+    const minPriceInput = document.getElementById('min-price');
+    const maxPriceInput = document.getElementById('max-price');
+    const distanceInput = document.getElementById('distance-input');
+    const descriptionInput = document.getElementById('description');
+
+    function showError(input, message) {
+        input.classList.add('input-error');
+        const errorSpan = document.createElement('span');
+        errorSpan.className = 'field-error';
+        errorSpan.innerText = message;
+        input.parentNode.insertBefore(errorSpan, input.nextSibling);
+        isValid = false;
+    }
+
+    if (!nameInput.value.trim()) showError(nameInput, 'Name cannot be empty');
+    if (!locationInput.value.trim()) showError(locationInput, 'Location cannot be empty');
+    if (!foodsAvailableInput.value.trim()) showError(foodsAvailableInput, 'Foods available cannot be empty');
+
+    const minPrice = parseInt(minPriceInput.value);
+    const maxPrice = parseInt(maxPriceInput.value);
+    if (isNaN(minPrice) || minPrice <= 0) showError(minPriceInput, 'Min price must be > 0');
+    if (isNaN(maxPrice) || maxPrice <= minPrice) showError(maxPriceInput, 'Max price must be > min price');
+
+    if (!descriptionInput.value.trim() || descriptionInput.value.trim().length < 5) showError(descriptionInput, 'Description must be at least 5 characters');
+
+    if (!isValid) return;
+
     const newPlace = {
-        name: document.getElementById('shop-name').value,
-        location: document.getElementById('location').value,
-        food_type: document.getElementById('food-type-input').value,
-        foods_available: document.getElementById('foods-available').value,
-        min_price: parseInt(document.getElementById('min-price').value),
-        max_price: parseInt(document.getElementById('max-price').value),
-        distance: parseFloat(document.getElementById('distance-input').value),
-        description: document.getElementById('description').value,
+        name: nameInput.value,
+        location: locationInput.value,
+        food_type: foodTypeInput.value,
+        foods_available: foodsAvailableInput.value,
+        min_price: minPrice,
+        max_price: maxPrice,
+        distance: parseFloat(distanceInput.value),
+        description: descriptionInput.value,
         section: 'meals-100',
-        user_id: user.id
+        user_id: user.id,
+        added_by: user.email
     };
 
     const { error } = await db.from('food_spots').insert([newPlace]);
@@ -200,13 +244,13 @@ function applyAdvancedFilters() {
 
         if (priceRange === '0-100') {
             matchesPrice = minPrice <= 100 || maxPrice <= 100;
-        } 
+        }
         else if (priceRange === '100-250') {
             matchesPrice = maxPrice >= 100 && minPrice <= 250;
-        } 
+        }
         else if (priceRange === '250-500') {
             matchesPrice = maxPrice >= 250 && minPrice <= 500;
-        } 
+        }
         else if (priceRange === '500+') {
             matchesPrice = maxPrice >= 500;
         }
@@ -336,7 +380,7 @@ function initMapForNearby(userLat, userLng, places) {
                 <div>
                     <h4>${place.name}</h4>
                     <p>${place.description}</p>
-                    <p>Distance: ${place.distance.toFixed(1)} km</p>
+                    <p>Distance: ${place.distance.toFixed(1)} km away</p>
                     <p>Cheapest: ₹${place.min_price ?? place.minPrice}</p>
                     <p>Max: ₹${place.max_price ?? place.maxPrice ?? 'N/A'}</p>
                 </div>
@@ -364,6 +408,17 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
             });
             displayPlaces(filtered, true);
         }
+    });
+});
+
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const navLinks = document.querySelector('.nav-links');
+hamburgerBtn?.addEventListener('click', () => {
+    navLinks?.classList.toggle('open');
+});
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        navLinks?.classList.remove('open');
     });
 });
 
