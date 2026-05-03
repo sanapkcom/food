@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication - CheapEats</title>
+    <title>Login – EATSPOT</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -13,22 +13,26 @@
 <body>
     <nav class="navbar">
         <div class="container">
-            <h1 class="logo"><a href="index.html" style="color:white; text-decoration:none;">🍽️ EATSPOT</a></h1>
+            <h1 class="logo"><a href="index.html" style="color:white;text-decoration:none;">🍽️ EATSPOT</a></h1>
         </div>
     </nav>
 
     <div class="container">
         <div class="auth-container">
-            <h2>CheapEats 🍴</h2>
-            <form id="auth-form">
-                <input type="email" id="auth-email" placeholder="Email" required>
+            <div style="font-size:2.8rem;margin-bottom:0.5rem;">🍽️</div>
+            <h2>EATSPOT</h2>
+            <p style="color:#64748b;font-size:0.95rem;margin-bottom:1.8rem;">Sign in to discover and share food spots</p>
+
+            <form id="auth-form" style="box-shadow:none;padding:0;border:none;background:transparent;">
+                <input type="email" id="auth-email" placeholder="Email address" required>
                 <input type="password" id="auth-password" placeholder="Password" required>
-                <button type="submit" class="btn-primary" id="auth-btn">Sign In</button>
+                <button type="submit" class="btn-primary" id="auth-btn" style="width:100%;animation:none;">Sign In</button>
             </form>
+
             <div class="auth-error" id="auth-error"></div>
             <div class="auth-toggle">
-                <span id="auth-toggle-text">Don't have an account?</span> 
-                <a id="auth-toggle-link">Sign Up</a>
+                <span id="auth-toggle-text">Don't have an account?</span>
+                <a id="auth-toggle-link"> Sign Up</a>
             </div>
         </div>
     </div>
@@ -45,22 +49,19 @@
 
         toggleLink.addEventListener('click', () => {
             isLogin = !isLogin;
-            if (isLogin) {
-                btn.textContent = 'Sign In';
-                toggleText.textContent = "Don't have an account?";
-                toggleLink.textContent = 'Sign Up';
-            } else {
-                btn.textContent = 'Sign Up';
-                toggleText.textContent = "Already have an account?";
-                toggleLink.textContent = 'Sign In';
-            }
+            btn.textContent = isLogin ? 'Sign In' : 'Sign Up';
+            toggleText.textContent = isLogin ? "Don't have an account?" : "Already have an account?";
+            toggleLink.textContent = isLogin ? ' Sign Up' : ' Sign In';
             errorDiv.style.display = 'none';
         });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             errorDiv.style.display = 'none';
-            const email = emailInput.value;
+            btn.textContent = '⏳ Please wait…';
+            btn.disabled = true;
+
+            const email = emailInput.value.trim();
             const password = passwordInput.value;
 
             let result;
@@ -69,6 +70,9 @@
             } else {
                 result = await signUpWithEmail(email, password);
             }
+
+            btn.disabled = false;
+            btn.textContent = isLogin ? 'Sign In' : 'Sign Up';
 
             if (result.error) {
                 errorDiv.textContent = result.error.message;
