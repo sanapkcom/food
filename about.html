@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About – EATSPOT</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo"><a href="index.html" style="color:white;text-decoration:none;">🍽️ EATSPOT</a></h1>
+            <div class="nav-right">
+                <ul class="nav-links" id="nav-links" style="opacity:1;">
+                    <li style="opacity:1;"><a href="index.html">Home</a></li>
+                    <li style="opacity:1;"><a href="index.html#explore">Explore</a></li>
+                    <li style="opacity:1;"><a href="about.html">About</a></li>
+                    <li style="opacity:1;"><a href="contact.html">Contact</a></li>
+                    <li id="auth-nav" style="display:flex;align-items:center;opacity:1;"></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="static-hero">
+        <div class="container">
+            <h1>About EATSPOT 🍽️</h1>
+            <p>We help you find the best, most affordable food spots around you</p>
+        </div>
+    </div>
+
+    <section class="static-page">
+        <div class="container">
+            <h2>Our Story</h2>
+            <p>EATSPOT was born out of a simple problem — it's hard to find good, affordable food spots in your area, especially when you're a student or someone on a budget. We wanted to build a community-driven platform where anyone could discover and share hidden food gems.</p>
+            <p>Whether it's that little tea stall by the road, your favourite bakery, or the best biryani joint in town — EATSPOT puts them all on the map so nobody misses out.</p>
+
+            <div class="about-grid">
+                <div class="about-card">
+                    <span class="card-icon">📍</span>
+                    <h3>Real Locations</h3>
+                    <p>Every spot is pinned with real coordinates so you always know exactly how far away it is from you.</p>
+                </div>
+                <div class="about-card">
+                    <span class="card-icon">💰</span>
+                    <h3>Budget Friendly</h3>
+                    <p>Filter by price range to find food that fits your budget — from under ₹50 to a full restaurant meal.</p>
+                </div>
+                <div class="about-card">
+                    <span class="card-icon">🙋</span>
+                    <h3>Community Driven</h3>
+                    <p>Anyone can add a spot. Reviews, ratings, and reports are all powered by real people like you.</p>
+                </div>
+                <div class="about-card">
+                    <span class="card-icon">⭐</span>
+                    <h3>Honest Reviews</h3>
+                    <p>Leave honest star ratings and reviews so others can trust the spots they're visiting.</p>
+                </div>
+                <div class="about-card">
+                    <span class="card-icon">🗺️</span>
+                    <h3>Get Directions</h3>
+                    <p>One tap to open Google Maps and get turn-by-turn directions to any food spot.</p>
+                </div>
+                <div class="about-card">
+                    <span class="card-icon">🔖</span>
+                    <h3>Bookmarks</h3>
+                    <p>Save your favourite spots with a single tap and find them again instantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <p>&copy; 2025 EATSPOT. Discover food spots near you.</p>
+            <div class="footer-links">
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact / Help</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

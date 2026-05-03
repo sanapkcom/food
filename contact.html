@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact / Help – EATSPOT</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo"><a href="index.html" style="color:white;text-decoration:none;">🍽️ EATSPOT</a></h1>
+            <div class="nav-right">
+                <ul class="nav-links" id="nav-links" style="opacity:1;">
+                    <li style="opacity:1;"><a href="index.html">Home</a></li>
+                    <li style="opacity:1;"><a href="index.html#explore">Explore</a></li>
+                    <li style="opacity:1;"><a href="about.html">About</a></li>
+                    <li style="opacity:1;"><a href="contact.html">Contact</a></li>
+                    <li id="auth-nav" style="display:flex;align-items:center;opacity:1;"></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="static-hero">
+        <div class="container">
+            <h1>Contact & Help 💬</h1>
+            <p>Got a question or feedback? We'd love to hear from you</p>
+        </div>
+    </div>
+
+    <section class="static-page">
+        <div class="container">
+            <h2>Send us a Message</h2>
+            <p>Use the form below to get in touch with the EATSPOT team. We'll get back to you as soon as possible.</p>
+
+            <div class="contact-form-wrap">
+                <form id="contact-form">
+                    <input type="text" id="contact-name" placeholder="Your Name" required>
+                    <input type="email" id="contact-email" placeholder="Your Email" required>
+                    <select id="contact-subject">
+                        <option value="">Select a topic</option>
+                        <option value="bug">Report a bug</option>
+                        <option value="wrong_spot">Wrong spot information</option>
+                        <option value="feature">Feature request</option>
+                        <option value="account">Account issue</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <textarea id="contact-message" placeholder="Your message…" style="min-height:120px;" required></textarea>
+                    <button type="submit" class="btn-primary" style="animation:none;">Send Message 📨</button>
+                </form>
+                <div id="contact-success" style="display:none; text-align:center; margin-top:20px;">
+                    <div style="font-size:3rem;">✅</div>
+                    <h3 style="color:#5a6b45; margin:12px 0 6px;">Message Sent!</h3>
+                    <p style="color:#64748b;">Thanks for reaching out. We'll reply to your email soon.</p>
+                </div>
+            </div>
+
+            <div class="contact-info-box">
+                <h3>📌 Quick Help</h3>
+                <p>🍽️ <strong>Adding a spot</strong> — You need to be logged in. Click "Add Place" in the navbar.</p>
+                <p>📍 <strong>Distance not showing?</strong> — Allow location access when the browser asks.</p>
+                <p>🖼️ <strong>Image upload</strong> — Make sure your Supabase "spot-images" storage bucket is set to public.</p>
+                <p>✏️ <strong>Edit/Delete</strong> — Only the person who added a spot can edit or delete it.</p>
+                <p>🚩 <strong>Report a spot</strong> — Open any spot's detail page and tap "Report".</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <p>&copy; 2025 EATSPOT. Discover food spots near you.</p>
+            <div class="footer-links">
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact / Help</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('contact-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name    = document.getElementById('contact-name').value.trim();
+            const email   = document.getElementById('contact-email').value.trim();
+            const subject = document.getElementById('contact-subject').value;
+            const message = document.getElementById('contact-message').value.trim();
+
+            // Save to Supabase contact_messages table
+            const { error } = await db.from('contact_messages').insert([{ name, email, subject, message }]);
+
+            if (error) {
+                alert('Something went wrong: ' + error.message);
+                return;
+            }
+
+            document.getElementById('contact-form').style.display = 'none';
+            document.getElementById('contact-success').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
