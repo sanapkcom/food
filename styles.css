@@ -43,9 +43,9 @@ body::before {
     animation: fadeInDown 0.8s ease-out both;
 }
 
-.navbar .container { display: flex; justify-content: space-between; align-items: center; }
+.navbar .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; }
 
-.logo { font-size: 1.8rem; font-weight: 700; display: flex; align-items: center; margin: 0; }
+.logo { font-size: 1.8rem; font-weight: 700; display: flex; align-items: center; margin: 0; white-space: nowrap; gap: 0.3rem; }
 
 .nav-right { display: flex; align-items: center; gap: 2rem; }
 
@@ -213,19 +213,6 @@ body::before {
 }
 .hero-search-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(136,151,108,0.4); }
 
-/* Quick Filters */
-.quick-filters { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; margin: 2rem 0; animation: fadeInUp 1s ease-out 0.5s both; }
-.filters { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; margin: 2rem 0; }
-.filter-btn {
-    background: white; border: 2px solid #88976c; color: #88976c;
-    padding: 12px 24px; border-radius: 30px; cursor: pointer;
-    transition: all 0.3s; font-weight: 500;
-    box-shadow: 0 2px 8px rgba(136,151,108,0.1);
-    font-size: 0.9rem; font-family: 'Poppins', sans-serif;
-}
-.filter-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(136,151,108,0.2); }
-.filter-btn.active { background: linear-gradient(135deg, #88976c 0%, #728156 100%); color: white; box-shadow: 0 4px 15px rgba(136,151,108,0.4); }
-
 /* ── Place Cards ─────────────────────────────── */
 .places-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 28px; }
 
@@ -332,7 +319,7 @@ body::before {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     padding: 4rem 0;
 }
-.add-place h3 { text-align: center; margin-bottom: 2.5rem; font-size: 2rem; font-weight: 700; color: #1e293b; }
+.add-place h3 { text-align: center; margin-bottom: 2.5rem; font-size: 2rem; font-weight: 700; color: #1e293b; white-space: nowrap; }
 
 form {
     max-width: 600px;
@@ -610,6 +597,7 @@ form textarea { min-height: 90px; resize: vertical; }
 }
 
 @media (max-width: 767px) {
+    .add-place h3 { font-size: 1.3rem; }
     .hero { padding: 3.5rem 0; }
     .hero h2 { font-size: 2.2rem; }
     .hero p { font-size: 1rem; }

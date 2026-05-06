@@ -50,11 +50,11 @@ function requestUserLocation() {
                 displayPlaces(allPlaces);
             },
             () => {
-                if (locText) locText.textContent = 'Location off';
+                if (locText) locText.textContent = 'Kerala';
             }
         );
     } else {
-        if (locText) locText.textContent = 'Not supported';
+        if (locText) locText.textContent = 'Kerala';
     }
 }
 
@@ -63,11 +63,16 @@ async function reverseGeocode(lat, lng) {
     try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
         const data = await res.json();
-        const area = data.address?.suburb || data.address?.city_district || data.address?.town || data.address?.city || 'Your Location';
-        const city = data.address?.city || data.address?.state || '';
-        if (locText) locText.textContent = city ? `${area}, ${city}` : area;
+        const area = 
+            data.address?.city ||
+            data.address?.town || 
+            data.address?.state_district ||
+            data.address?.suburb ||
+            data.address?.state ||
+            'Kerala';
+        if (locText) locText.textContent = area;
     } catch {
-        if (locText) locText.textContent = `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+        if (locText) locText.textContent = 'Kerala';
     }
 }
 
@@ -141,7 +146,7 @@ function renderStars(rating, interactive = false, spotId = null) {
 }
 
 // ─── Place card ───────────────────────────────
-async function createPlaceCard(place, index) {
+async function createPlaceCard(place, index, user) {
     const deliveryTime = place.delivery_time || (Math.floor(Math.random() * 20) + 15);
     place.delivery_time = deliveryTime;
     const imageUrl = place.image_url || (place.image ? place.image : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80');
@@ -165,7 +170,6 @@ async function createPlaceCard(place, index) {
     const ratingCount = place.rating_count || 0;
 
     // Check if current user owns this spot
-    const { data: { user } } = await db.auth.getUser();
     const isOwner = user && place.user_id === user.id;
 
     const ownerButtons = isOwner ? `
@@ -211,6 +215,7 @@ async function createPlaceCard(place, index) {
 
 // ─── Display places ───────────────────────────
 async function displayPlaces(places, isFiltering = false) {
+    const { data: { user } } = await db.auth.getUser();
     const sorted = [...places].sort((a, b) => (a.min_price || 0) - (b.min_price || 0));
     const sections = {
         'meals-100': sorted.filter(p => p.section === 'meals-100'),
@@ -224,7 +229,7 @@ async function displayPlaces(places, isFiltering = false) {
         if (sections[sectionId].length === 0) {
             grid.innerHTML = `<div class="empty-state"><p>🍽️ No spots here yet!</p><p>Be the first to add one.</p></div>`;
         } else {
-            const cards = await Promise.all(sections[sectionId].map((p, i) => createPlaceCard(p, i)));
+            const cards = await Promise.all(sections[sectionId].map((p, i) => createPlaceCard(p, i, user)));
             grid.innerHTML = cards.join('');
         }
     }
@@ -573,18 +578,6 @@ document.getElementById('search-input')?.addEventListener('input', applyAdvanced
 document.getElementById('food-type')?.addEventListener('change', applyAdvancedFilters);
 document.getElementById('price-range')?.addEventListener('change', applyAdvancedFilters);
 document.getElementById('distance')?.addEventListener('change', applyAdvancedFilters);
-
-// ─── Quick price filter buttons ───────────────
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        const val = e.target.getAttribute('data-filter');
-        if (val === 'all') { displayPlaces(allPlaces); return; }
-        const max = parseInt(val);
-        displayPlaces(allPlaces.filter(p => Number(p.min_price || 0) <= max), true);
-    });
-});
 
 // ─── Bookmarks (localStorage) ─────────────────
 function getBookmarks() {
