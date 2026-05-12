@@ -93,6 +93,81 @@ function pickMyLocation() {
     );
 }
 
+let nominatimTimeout = null;
+
+function initLocationSearch() {
+    const input = document.getElementById('location-search');
+    const list = document.getElementById('location-suggestions');
+    if (!input || !list) return;
+
+    input.addEventListener('input', () => {
+        clearTimeout(nominatimTimeout);
+        const query = input.value.trim();
+        if (query.length < 3) { list.innerHTML = ''; list.style.display = 'none'; return; }
+
+        nominatimTimeout = setTimeout(async () => {
+            try {
+                const res = await fetch(
+                    'https://nominatim.openstreetmap.org/search?format=json&q=' 
+                    + encodeURIComponent(query + ' Kerala India') 
+                    + '&limit=5&countrycodes=in',
+                    { headers: { 'Accept-Language': 'en' } }
+                );
+                const results = await res.json();
+
+                if (!results.length) {
+                    list.innerHTML = '<li class="suggestion-item no-result">No results found</li>';
+                    list.style.display = 'block';
+                    return;
+                }
+
+                list.innerHTML = results.map(r => 
+                    '<li class="suggestion-item" ' +
+                    'data-lat="' + r.lat + '" ' +
+                    'data-lng="' + r.lon + '" ' +
+                    'data-name="' + r.display_name.split(',').slice(0,2).join(',') + '">' +
+                    r.display_name.split(',').slice(0,3).join(', ') +
+                    '</li>'
+                ).join('');
+                list.style.display = 'block';
+
+                list.querySelectorAll('.suggestion-item[data-lat]').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const lat = item.dataset.lat;
+                        const lng = item.dataset.lng;
+                        const name = item.dataset.name;
+
+                        document.getElementById('spot-lat').value = lat;
+                        document.getElementById('spot-lng').value = lng;
+                        input.value = name;
+
+                        if (!document.getElementById('location').value.trim()) {
+                            document.getElementById('location').value = name;
+                        }
+
+                        document.getElementById('picked-location-display')
+                            .textContent = 'Location pinned successfully';
+                        document.getElementById('picked-location-display')
+                            .style.color = '#4a5c2f';
+
+                        list.innerHTML = '';
+                        list.style.display = 'none';
+                    });
+                });
+            } catch {
+                list.innerHTML = '<li class="suggestion-item no-result">Search failed. Try again.</li>';
+                list.style.display = 'block';
+            }
+        }, 400);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.location-search-wrapper')) {
+            list.style.display = 'none';
+        }
+    });
+}
+
 // ─── Image preview ────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const imgInput = document.getElementById('spot-image');
@@ -108,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(file);
         });
     }
+    initLocationSearch();
     requestUserLocation();
     loadPlaces();
 });
@@ -230,7 +306,6 @@ async function createPlaceCard(place, index, user) {
                 </div>
                 <div class="card-footer">
                     <span class="place-distance">📏 ${distLabel}</span>
-                    <button class="btn-secondary" onclick="viewLocation('${place.id}'); event.stopPropagation();">View Location 📍</button>
                 </div>
                 ${ownerButtons}
                 <div class="added-by">🙋 Added by: ${place.added_by || 'Anonymous'}</div>
@@ -272,25 +347,25 @@ async function loadPlaces() {
     displayPlaces(allPlaces);
 }
 
-// ─── View Location (Google Maps) ─────────────
-function viewLocation(id) {
+// ─── Open in Maps ─────────────────────────────
+function openInMaps(id) {
     const place = allPlaces.find(p => String(p.id) === String(id));
-    if (place && place.lat && place.lng) {
-        window.open(`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`, '_blank');
-    } else {
-        alert('Location coordinates not available for this spot.');
+    if (!place?.lat || !place?.lng) {
+        alert('Location not available for this spot.');
+        return;
     }
-}
-
-// ─── Get Directions ───────────────────────────
-function getDirections(id) {
-    const place = allPlaces.find(p => String(p.id) === String(id));
-    if (!place?.lat || !place?.lng) { alert('No coordinates for this spot.'); return; }
-    const dest = `${place.lat},${place.lng}`;
+    const dest = place.lat + ',' + place.lng;
     if (userLat && userLng) {
-        window.open(`https://www.google.com/maps/dir/${userLat},${userLng}/${dest}`, '_blank');
+        window.open(
+            'https://www.google.com/maps/dir/' + 
+            userLat + ',' + userLng + '/' + dest, 
+            '_blank'
+        );
     } else {
-        window.open(`https://www.google.com/maps/dir//${dest}`, '_blank');
+        window.open(
+            'https://www.google.com/maps/search/?api=1&query=' + dest,
+            '_blank'
+        );
     }
 }
 
@@ -356,9 +431,14 @@ async function openSpotDetail(id) {
             <p class="detail-row">🙋 <strong>Added by:</strong> ${place.added_by || 'Anonymous'}</p>
 
             <div class="detail-actions">
-                <button class="btn-primary" onclick="getDirections('${id}')">🗺️ Get Directions</button>
-                <button class="btn-secondary" onclick="viewLocation('${id}')">📍 View on Map</button>
-                <button class="btn-report" onclick="openReportModal('${id}')">🚩 Report</button>
+                <button class="btn-primary" 
+                    onclick="openInMaps('${id}')">
+                    Open in Maps
+                </button>
+                <button class="btn-report" 
+                    onclick="openReportModal('${id}')">
+                    Report
+                </button>
             </div>
 
             <div class="reviews-section">
@@ -441,8 +521,10 @@ async function editSpot(id) {
     document.getElementById('description').value = place.description || '';
     if (place.lat) document.getElementById('spot-lat').value = place.lat;
     if (place.lng) document.getElementById('spot-lng').value = place.lng;
+    const locSearch = document.getElementById('location-search');
+    if (locSearch) locSearch.value = place.location || '';
     if (place.lat && place.lng) {
-        document.getElementById('picked-location-display').textContent = `✅ ${place.lat}, ${place.lng}`;
+        document.getElementById('picked-location-display').textContent = 'Location pinned successfully';
     }
     if (place.open_time) document.getElementById('open-time').value = place.open_time;
     if (place.close_time) document.getElementById('close-time').value = place.close_time;
@@ -505,6 +587,14 @@ document.getElementById('add-place-form')?.addEventListener('submit', async (e) 
     if (isNaN(maxPrice) || maxPrice <= minPrice) showError(maxPriceInput, 'Max price must be > min price');
     if (!descInput.value.trim() || descInput.value.trim().length < 5) showError(descInput, 'Description must be at least 5 characters');
 
+    const latVal = document.getElementById('spot-lat').value;
+    const lngVal = document.getElementById('spot-lng').value;
+    if (!latVal || !lngVal) {
+        const locSearch = document.getElementById('location-search');
+        showError(locSearch, 'Please search and select a location from suggestions');
+        isValid = false;
+    }
+
     if (!isValid) return;
 
     // Image upload
@@ -550,6 +640,8 @@ document.getElementById('add-place-form')?.addEventListener('submit', async (e) 
 
     alert(editingSpotId ? 'Spot updated! ✅' : 'Place added! ✅');
     e.target.reset();
+    document.getElementById('location-search').value = '';
+    document.getElementById('location-suggestions').innerHTML = '';
     removeImage();
     document.getElementById('picked-location-display').textContent = '';
     const submitBtn = e.target.querySelector('button[type="submit"]');

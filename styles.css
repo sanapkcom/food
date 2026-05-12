@@ -854,3 +854,80 @@ form textarea { min-height: 90px; resize: vertical; }
 @media (hover: none) and (pointer: coarse) {
     .place-card:hover, .filter-btn:hover, .btn-primary:hover, .btn-secondary:hover { transform: none; }
 }
+
+.location-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.location-search-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #f8fafc;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.location-search-input:focus {
+  border-color: #88976c;
+  background: white;
+}
+
+.location-suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  z-index: 9999;
+  list-style: none;
+  padding: 0.3rem 0;
+  margin: 0;
+  display: none;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  color: #374151;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.suggestion-item:hover {
+  background: #f0f4e8;
+  color: #4a5c2f;
+}
+
+.no-result {
+  color: #94a3b8;
+  cursor: default;
+}
+
+.no-result:hover {
+  background: none;
+}
+
+.location-picker-label {
+  display: block;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.picked-location-text {
+  display: block;
+  font-size: 0.82rem;
+  margin-top: 0.4rem;
+  min-height: 1.2rem;
+}

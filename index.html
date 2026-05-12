@@ -146,9 +146,20 @@
 
                     <!-- Location Picker -->
                     <div class="location-picker-group">
-                        <button type="button" class="btn-locate" id="pick-location-btn" onclick="pickMyLocation()">
-                            📍 Use My Current Location
-                        </button>
+                        <label class="location-picker-label">
+                            Search & Pin Location
+                        </label>
+                        <div class="location-search-wrapper">
+                            <input 
+                                type="text" 
+                                id="location-search" 
+                                placeholder="Type area or place name e.g. Farook College Road"
+                                autocomplete="off"
+                                class="location-search-input"
+                            >
+                            <ul id="location-suggestions" 
+                                class="location-suggestions-list"></ul>
+                        </div>
                         <span id="picked-location-display" class="picked-location-text"></span>
                         <input type="hidden" id="spot-lat">
                         <input type="hidden" id="spot-lng">
