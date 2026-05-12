@@ -403,18 +403,13 @@ body::before {
 }
 .hero-search-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(136,151,108,0.4); }
 
-/* Quick Filters */
-.quick-filters { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; margin: 2rem 0; animation: fadeInUp 1s ease-out 0.5s both; }
-.filters { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; margin: 2rem 0; }
-.filter-btn {
-    background: white; border: 2px solid #88976c; color: #88976c;
-    padding: 12px 24px; border-radius: 30px; cursor: pointer;
-    transition: all 0.3s; font-weight: 500;
-    box-shadow: 0 2px 8px rgba(136,151,108,0.1);
-    font-size: 0.9rem; font-family: 'Poppins', sans-serif;
+.empty-search-state {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+    font-size: 1rem;
+    line-height: 1.8;
 }
-.filter-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(136,151,108,0.2); }
-.filter-btn.active { background: linear-gradient(135deg, #88976c 0%, #728156 100%); color: white; box-shadow: 0 4px 15px rgba(136,151,108,0.4); }
 
 /* ── Place Cards ─────────────────────────────── */
 .places-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 28px; }
@@ -443,15 +438,7 @@ body::before {
 .place-image { width: 100%; height: 200px; object-fit: cover; transition: transform 0.3s; display: block; }
 .place-card:hover .place-image { transform: scale(1.04); }
 
-.card-badge {
-    position: absolute; bottom: 10px; left: 12px;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(8px);
-    color: #88976c; padding: 5px 10px;
-    border-radius: 20px; font-size: 0.8rem; font-weight: 600;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.delivery-time { display: flex; align-items: center; gap: 4px; }
+
 
 /* Bookmark button on card */
 .bookmark-btn {
@@ -820,8 +807,6 @@ form textarea { min-height: 90px; resize: vertical; }
     .advanced-search-box { grid-template-columns: 1fr; padding: 16px; gap: 10px; }
     .search-field input, .search-field select, .hero-search-btn { height: 48px; }
     .places-grid { grid-template-columns: 1fr; gap: 18px; }
-    .filters { gap: 0.5rem; }
-    .filter-btn { padding: 9px 16px; font-size: 0.85rem; }
     form { padding: 24px 20px; }
     .modal-box { border-radius: 18px; }
     .detail-body { padding: 18px 20px 22px; }
@@ -852,7 +837,7 @@ form textarea { min-height: 90px; resize: vertical; }
 
 /* Touch devices */
 @media (hover: none) and (pointer: coarse) {
-    .place-card:hover, .filter-btn:hover, .btn-primary:hover, .btn-secondary:hover { transform: none; }
+    .place-card:hover, .btn-primary:hover, .btn-secondary:hover { transform: none; }
 }
 
 .location-search-wrapper {

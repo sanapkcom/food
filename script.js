@@ -109,8 +109,8 @@ function initLocationSearch() {
             try {
                 const res = await fetch(
                     'https://nominatim.openstreetmap.org/search?format=json&q=' 
-                    + encodeURIComponent(query + ' Kerala India') 
-                    + '&limit=5&countrycodes=in',
+                    + encodeURIComponent(query) 
+                    + '&limit=6&countrycodes=in&addressdetails=1',
                     { headers: { 'Accept-Language': 'en' } }
                 );
                 const results = await res.json();
@@ -121,14 +121,16 @@ function initLocationSearch() {
                     return;
                 }
 
-                list.innerHTML = results.map(r => 
-                    '<li class="suggestion-item" ' +
+                list.innerHTML = results.map(r => {
+                    const parts = r.display_name.split(',');
+                    const shortName = parts.slice(0, 3).join(',').trim();
+                    return '<li class="suggestion-item" ' +
                     'data-lat="' + r.lat + '" ' +
                     'data-lng="' + r.lon + '" ' +
-                    'data-name="' + r.display_name.split(',').slice(0,2).join(',') + '">' +
-                    r.display_name.split(',').slice(0,3).join(', ') +
-                    '</li>'
-                ).join('');
+                    'data-name="' + shortName + '">' +
+                    shortName +
+                    '</li>';
+                }).join('');
                 list.style.display = 'block';
 
                 list.querySelectorAll('.suggestion-item[data-lat]').forEach(item => {
@@ -245,8 +247,6 @@ function getOpenStatus(openTime, closeTime) {
 
 // ─── Place card ───────────────────────────────
 async function createPlaceCard(place, index, user) {
-    const deliveryTime = place.delivery_time || (Math.floor(Math.random() * 20) + 15);
-    place.delivery_time = deliveryTime;
     const imageUrl = place.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80';
 
     let distVal = null;
@@ -287,9 +287,6 @@ async function createPlaceCard(place, index, user) {
         <div class="place-card" style="animation-delay:${index * 0.1}s" onclick="openSpotDetail('${place.id}')">
             <div class="card-image-container">
                 <img src="${imageUrl}" alt="${place.name}" class="place-image" onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80'">
-                <div class="card-badge">
-                    <span class="delivery-time">🕒 ${deliveryTime} min</span>
-                </div>
                 ${openStatus ? `<div class="open-status-badge open-status--${openStatus.type}">${openStatus.label}</div>` : ''}
                 <button class="bookmark-btn" onclick="toggleBookmark('${place.id}'); event.stopPropagation();" title="Bookmark">${bookmarkIcon}</button>
             </div>
@@ -331,7 +328,35 @@ async function displayPlaces(places, isFiltering = false) {
             grid.innerHTML = `<div class="empty-state"><p>🍽️ No spots here yet!</p><p>Be the first to add one.</p></div>`;
         } else {
             const cards = await Promise.all(sections[sectionId].map((p, i) => createPlaceCard(p, i, user)));
-            grid.innerHTML = cards.join('');
+            grid.style.opacity = '0.4';
+            grid.style.transition = 'opacity 0.2s ease';
+            setTimeout(() => {
+                grid.innerHTML = cards.join('');
+                grid.style.opacity = '1';
+            }, 150);
+        }
+    }
+
+    Object.keys(sections).forEach(sectionId => {
+        const heading = document.querySelector('#' + sectionId + ' h3');
+        if (heading) {
+            const count = sections[sectionId].length;
+            const baseName = heading.textContent.replace(/\s*\(\d+\)/, '');
+            heading.textContent = baseName + (count > 0 ? ' (' + count + ')' : '');
+        }
+    });
+
+    const totalShown = Object.values(sections).reduce((sum, arr) => sum + arr.length, 0);
+    const resultsDiv = document.getElementById('results');
+    if (resultsDiv) {
+        if (totalShown === 0) {
+            resultsDiv.innerHTML = 
+                '<div class="empty-search-state">' +
+                '<p>No food spots found matching your search.</p>' +
+                '<p>Try changing your filters or search term.</p>' +
+                '</div>';
+        } else {
+            resultsDiv.innerHTML = '';
         }
     }
 }
@@ -434,6 +459,9 @@ async function openSpotDetail(id) {
                 <button class="btn-primary" 
                     onclick="openInMaps('${id}')">
                     Open in Maps
+                </button>
+                <button class="btn-secondary" onclick="shareSpot('${id}')">
+                    Share
                 </button>
                 <button class="btn-report" 
                     onclick="openReportModal('${id}')">
@@ -638,7 +666,7 @@ document.getElementById('add-place-form')?.addEventListener('submit', async (e) 
 
     if (error) { alert(error.message); return; }
 
-    alert(editingSpotId ? 'Spot updated! ✅' : 'Place added! ✅');
+    showToast(editingSpotId ? 'Spot updated!' : 'Place added successfully!');
     e.target.reset();
     document.getElementById('location-search').value = '';
     document.getElementById('location-suggestions').innerHTML = '';
@@ -646,8 +674,20 @@ document.getElementById('add-place-form')?.addEventListener('submit', async (e) 
     document.getElementById('picked-location-display').textContent = '';
     const submitBtn = e.target.querySelector('button[type="submit"]');
     submitBtn.textContent = 'Submit';
+    
+    if (editingSpotId) {
+        const { data: updated } = await db.from('food_spots').select('*').eq('id', editingSpotId).single();
+        if (updated) {
+            const idx = allPlaces.findIndex(p => String(p.id) === String(editingSpotId));
+            if (idx !== -1) allPlaces[idx] = updated;
+        }
+    } else {
+        const { data: newest } = await db.from('food_spots').select('*').order('id', { ascending: false }).limit(1).single();
+        if (newest) allPlaces.unshift(newest);
+    }
+    displayPlaces(allPlaces);
+    
     editingSpotId = null;
-    await loadPlaces();
 });
 
 // ─── Advanced filters ─────────────────────────
@@ -688,6 +728,20 @@ function applyAdvancedFilters() {
         return matchesSearch && matchesFoodType && matchesPrice && matchesDist;
     });
 
+    const sortBy = document.getElementById('sort-by')?.value || 'price-asc';
+    filtered.sort((a, b) => {
+        if (sortBy === 'price-asc') return (a.min_price || 0) - (b.min_price || 0);
+        if (sortBy === 'price-desc') return (b.min_price || 0) - (a.min_price || 0);
+        if (sortBy === 'rating') return (b.avg_rating || 0) - (a.avg_rating || 0);
+        if (sortBy === 'newest') return (b.id || 0) - (a.id || 0);
+        if (sortBy === 'distance' && userLat && userLng) {
+            const da = getDistance(userLat, userLng, a.lat, a.lng) || 999;
+            const db2 = getDistance(userLat, userLng, b.lat, b.lng) || 999;
+            return da - db2;
+        }
+        return 0;
+    });
+
     displayPlaces(filtered, true);
 }
 
@@ -696,6 +750,33 @@ document.getElementById('search-input')?.addEventListener('input', applyAdvanced
 document.getElementById('food-type')?.addEventListener('change', applyAdvancedFilters);
 document.getElementById('price-range')?.addEventListener('change', applyAdvancedFilters);
 document.getElementById('distance')?.addEventListener('change', applyAdvancedFilters);
+document.getElementById('sort-by')?.addEventListener('change', applyAdvancedFilters);
+
+function shareSpot(id) {
+    const place = allPlaces.find(p => String(p.id) === String(id));
+    if (!place) return;
+    const text = place.name + ' - ' + (place.location || '') + 
+        ' | Min price: ₹' + place.min_price;
+    const mapsUrl = place.lat && place.lng 
+        ? ' https://maps.google.com/?q=' + place.lat + ',' + place.lng 
+        : '';
+    if (navigator.share) {
+        navigator.share({ title: place.name, text: text + mapsUrl });
+    } else {
+        navigator.clipboard.writeText(text + mapsUrl)
+            .then(() => showToast('Spot details copied!'))
+            .catch(() => showToast('Could not copy. Try manually.'));
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const spotModal = document.getElementById('spot-detail-modal');
+        const reportModal = document.getElementById('report-modal');
+        if (spotModal?.style.display === 'flex') closeSpotDetail();
+        if (reportModal?.style.display === 'flex') closeReportModal();
+    }
+});
 
 // ─── Bookmarks (localStorage) ─────────────────
 function getBookmarks() {
