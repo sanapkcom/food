@@ -16,21 +16,20 @@
     <nav class="navbar">
         <div class="container">
             <h1 class="logo">🍽️ EATSPOT</h1>
-            <div class="nav-right">
-                <button class="hamburger-btn" id="hamburger-btn">☰</button>
-                <div class="location-indicator" onclick="requestUserLocation()" style="cursor:pointer;" title="Click to update your location">
-                    <span class="location-icon">📍</span>
-                    <span class="location-text" id="location-text">Locating...</span>
-                </div>
-                <ul class="nav-links" id="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#explore">Explore</a></li>
-                    <li><a href="#add-place" id="nav-add-place">Add Place</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                    <li id="auth-nav" style="display:flex;align-items:center;"></li>
-                </ul>
+            <div class="location-indicator" onclick="requestUserLocation()" style="cursor:pointer;" title="Click to update your location">
+                <span class="location-icon">📍</span>
+                <span class="location-text" id="location-text">Locating...</span>
             </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#explore">Explore</a></li>
+                <li><a href="#add-place" id="nav-add-place">Add Place</a></li>
+                <li><a href="bookmarks.html">🔖 Bookmarks</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li id="auth-nav" style="display:flex;align-items:center;gap:10px;"></li>
+            </ul>
+            <button class="hamburger-btn" id="hamburger-btn">☰</button>
         </div>
     </nav>
 

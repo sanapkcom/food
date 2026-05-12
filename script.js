@@ -63,6 +63,14 @@ async function reverseGeocode(lat, lng) {
     try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
         const data = await res.json();
+<<<<<<< HEAD
+        const area = data.address?.suburb || data.address?.city_district || data.address?.town || data.address?.city || 'Your Location';
+        const city = data.address?.city || data.address?.state || '';
+        const label = city ? `${area}, ${city}` : area;
+        if (locText) locText.textContent = label;
+        const sidebarLoc = document.getElementById('sidebar-location-text');
+        if (sidebarLoc) sidebarLoc.textContent = label;
+=======
         const area = 
             data.address?.city ||
             data.address?.town || 
@@ -71,6 +79,7 @@ async function reverseGeocode(lat, lng) {
             data.address?.state ||
             'Kerala';
         if (locText) locText.textContent = area;
+>>>>>>> main
     } catch {
         if (locText) locText.textContent = 'Kerala';
     }
@@ -145,11 +154,38 @@ function renderStars(rating, interactive = false, spotId = null) {
     return [1, 2, 3, 4, 5].map(i => `<span class="star">${i <= Math.round(rating || 0) ? '★' : '☆'}</span>`).join('');
 }
 
+// ─── Open Now status ──────────────────────────
+function getOpenStatus(openTime, closeTime) {
+    if (!openTime || !closeTime) return null;
+    const now = new Date();
+    const [oh, om] = openTime.split(':').map(Number);
+    const [ch, cm] = closeTime.split(':').map(Number);
+    const nowMins  = now.getHours() * 60 + now.getMinutes();
+    const openMins = oh * 60 + om;
+    const closeMins = ch * 60 + cm;
+
+    // Handle overnight (e.g. 22:00 – 02:00)
+    if (closeMins < openMins) {
+        const isOpen = nowMins >= openMins || nowMins < closeMins;
+        return isOpen
+            ? { type: 'open', label: '🟢 Open Now' }
+            : { type: 'closed', label: '🔴 Closed' };
+    }
+    const isOpen = nowMins >= openMins && nowMins < closeMins;
+    // Closing soon — within 30 mins
+    if (isOpen && closeMins - nowMins <= 30) {
+        return { type: 'closing', label: '🟡 Closing Soon' };
+    }
+    return isOpen
+        ? { type: 'open', label: '🟢 Open Now' }
+        : { type: 'closed', label: '🔴 Closed' };
+}
+
 // ─── Place card ───────────────────────────────
 async function createPlaceCard(place, index, user) {
     const deliveryTime = place.delivery_time || (Math.floor(Math.random() * 20) + 15);
     place.delivery_time = deliveryTime;
-    const imageUrl = place.image_url || (place.image ? place.image : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80');
+    const imageUrl = place.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80';
 
     let distVal = null;
     let distLabel = 'Distance unknown';
@@ -182,6 +218,9 @@ async function createPlaceCard(place, index, user) {
         ? `<p class="place-hours">🕐 ${place.open_time} – ${place.close_time}</p>`
         : '';
 
+    // Open Now badge
+    const openStatus = getOpenStatus(place.open_time, place.close_time);
+
     return `
         <div class="place-card" style="animation-delay:${index * 0.1}s" onclick="openSpotDetail('${place.id}')">
             <div class="card-image-container">
@@ -189,6 +228,7 @@ async function createPlaceCard(place, index, user) {
                 <div class="card-badge">
                     <span class="delivery-time">🕒 ${deliveryTime} min</span>
                 </div>
+                ${openStatus ? `<div class="open-status-badge open-status--${openStatus.type}">${openStatus.label}</div>` : ''}
                 <button class="bookmark-btn" onclick="toggleBookmark('${place.id}'); event.stopPropagation();" title="Bookmark">${bookmarkIcon}</button>
             </div>
             <div class="place-info">
@@ -290,7 +330,7 @@ async function openSpotDetail(id) {
         distLabel = d !== null ? `${d.toFixed(2)} km` : 'Unknown';
     }
 
-    const imageUrl = place.image_url || (place.image ? place.image : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80');
+    const imageUrl = place.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80';
     const hoursHtml = place.open_time && place.close_time
         ? `<p class="detail-row">🕐 <strong>Hours:</strong> ${place.open_time} – ${place.close_time}</p>` : '';
 
@@ -592,10 +632,12 @@ function toggleBookmark(id) {
         showToast('Bookmarked! 🔖');
     } else {
         bookmarks.splice(idx, 1);
-        showToast('Removed bookmark');
+        showToast('Bookmark removed');
     }
     localStorage.setItem('eatspot_bookmarks', JSON.stringify(bookmarks));
     displayPlaces(allPlaces);
+    // Refresh bookmarks page if open
+    if (document.getElementById('bookmarks-grid')) renderBookmarksPage();
 }
 
 // ─── Report ───────────────────────────────────
