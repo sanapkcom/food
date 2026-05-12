@@ -82,17 +82,6 @@ body::before {
     white-space: nowrap;
     flex-shrink: 0;
 }
-.location-indicator .location-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.3;
-}
-.location-indicator .location-text::before {
-    content: "Your Location,";
-    font-size: 0.75rem;
-    opacity: 0.85;
-    font-weight: 400;
-}
 .location-indicator:hover { background: rgba(255,255,255,0.25); }
 
 /* Hamburger - hidden on desktop, shown on mobile */
