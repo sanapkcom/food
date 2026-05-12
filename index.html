@@ -15,10 +15,12 @@
     <!-- NAVBAR -->
     <nav class="navbar">
         <div class="container">
-            <h1 class="logo">🍽️ EATSPOT</h1>
-            <div class="location-indicator" onclick="requestUserLocation()" style="cursor:pointer;" title="Click to update your location">
-                <span class="location-icon">📍</span>
-                <span class="location-text" id="location-text">Locating...</span>
+            <div class="nav-left">
+                <h1 class="logo">🍽️ EATSPOT</h1>
+                <div class="location-indicator" onclick="requestUserLocation()" style="cursor:pointer;" title="Click to update your location">
+                    <span class="location-icon">📍</span>
+                    <span class="location-text" id="location-text">Locating...</span>
+                </div>
             </div>
             <ul class="nav-links" id="nav-links">
                 <li><a href="#home">Home</a></li>
@@ -94,6 +96,15 @@
                         </select>
                     </div>
                     <button class="hero-search-btn" id="search-btn">Search</button>
+                </div>
+            </div>
+
+            <div class="quick-filters">
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="50">Under ₹50</button>
+                    <button class="filter-btn" data-filter="100">Under ₹100</button>
+                    <button class="filter-btn" data-filter="150">Under ₹150</button>
                 </div>
             </div>
 
