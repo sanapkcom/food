@@ -63,23 +63,9 @@ async function reverseGeocode(lat, lng) {
     try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
         const data = await res.json();
-<<<<<<< HEAD
         const area = data.address?.suburb || data.address?.city_district || data.address?.town || data.address?.city || 'Your Location';
         const city = data.address?.city || data.address?.state || '';
-        const label = city ? `${area}, ${city}` : area;
-        if (locText) locText.textContent = label;
-        const sidebarLoc = document.getElementById('sidebar-location-text');
-        if (sidebarLoc) sidebarLoc.textContent = label;
-=======
-        const area = 
-            data.address?.city ||
-            data.address?.town || 
-            data.address?.state_district ||
-            data.address?.suburb ||
-            data.address?.state ||
-            'Kerala';
-        if (locText) locText.textContent = area;
->>>>>>> main
+        if (locText) locText.textContent = city ? `${area}, ${city}` : area;
     } catch {
         if (locText) locText.textContent = 'Kerala';
     }
