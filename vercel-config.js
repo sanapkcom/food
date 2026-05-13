@@ -1,0 +1,2 @@
+const SUPABASE_URL = 'https://laaodqphshiagrsxdkbv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhYW9kcXBoc2hpYWdyc3hka2J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MTExMTYsImV4cCI6MjA5MjQ4NzExNn0.KINIo84c-IlNkQ0ERqUfQxeF3BxHeln9z4XkLqkRerU';
