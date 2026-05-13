@@ -166,22 +166,35 @@
                         <input type="hidden" id="spot-lng">
                     </div>
 
-                    <select id="food-type-input" required>
-                        <option value="">Select Food Type</option>
-                        <option value="bakery">Bakery</option>
-                        <option value="tea">Tea</option>
+                    <select id="food-type-input">
+                        <option value="">Select Food Type (optional)</option>
                         <option value="meals">Meals</option>
                         <option value="biryani">Biryani</option>
-                        <option value="mandhi">Mandhi</option>
-                        <option value="juice">Juice</option>
-                        <option value="cafe">Cafe</option>
                         <option value="shawarma">Shawarma</option>
-                        <option value="broast">Broast</option>
+                        <option value="juice">Juice & Beverages</option>
+                        <option value="bakery">Bakery & Snacks</option>
+                        <option value="tea-coffee">Tea & Coffee</option>
+                        <option value="street-food">Street Food</option>
+                        <option value="ice-cream">Ice Cream & Desserts</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="pizza">Pizza & Fast Food</option>
+                        <option value="seafood">Seafood</option>
+                        <option value="other">Other (specify)</option>
                     </select>
+                    <input 
+                        type="text" 
+                        id="food-type-other" 
+                        placeholder="Describe the food type e.g. Fusion, Vegan..."
+                        class="other-food-input"
+                        style="display:none;"
+                        maxlength="40"
+                    >
 
-                    <input type="text" id="foods-available" placeholder="Foods Available eg: tea, snacks, biryani" required>
+                    <input type="text" id="foods-available" placeholder="Foods Available e.g. tea, snacks (optional)">
                     <input type="number" id="min-price" placeholder="Minimum Price ₹" required>
+                    <span class="field-hint">Cheapest item price e.g. tea = ₹10</span>
                     <input type="number" id="max-price" placeholder="Maximum Price ₹" required>
+                    <span class="field-hint">Most expensive item e.g. full meals = ₹80</span>
 
                     <!-- Opening Hours -->
                     <div class="hours-group">
@@ -193,17 +206,38 @@
                         </div>
                     </div>
 
-                    <textarea id="description" placeholder="Short Description" required></textarea>
+                    <textarea id="description" placeholder="Short Description (optional)" maxlength="150"></textarea>
+                    <span class="char-counter" id="desc-counter">0/150</span>
 
                     <!-- Image Upload -->
-                    <div class="image-upload-group">
-                        <label class="image-upload-label" for="spot-image">
-                            📷 Upload a Photo (optional)
+                    <div class="form-field image-upload-field">
+                        <label class="image-upload-label">
+                            Add a Photo (optional)
                         </label>
-                        <input type="file" id="spot-image" accept="image/*" class="image-upload-input">
-                        <div id="image-preview-container" style="display:none;">
-                            <img id="image-preview" src="" alt="Preview" class="image-preview-thumb">
-                            <button type="button" class="remove-image-btn" onclick="removeImage()">✕ Remove</button>
+                        <div class="image-upload-wrapper" id="image-upload-wrapper">
+                            <input 
+                                type="file" 
+                                id="spot-image-input" 
+                                accept="image/*"
+                                class="image-file-input"
+                            >
+                            <div class="upload-placeholder" id="upload-placeholder">
+                                <span class="upload-icon">+</span>
+                                <span class="upload-text">Click to upload a photo</span>
+                                <span class="upload-hint">JPG, PNG up to 5MB</span>
+                            </div>
+                            <img 
+                                id="image-preview" 
+                                class="image-preview-thumb" 
+                                style="display:none;" 
+                                alt="Preview"
+                            >
+                            <button 
+                                type="button" 
+                                id="remove-image-btn" 
+                                class="remove-image-btn"
+                                style="display:none;"
+                            >Remove photo</button>
                         </div>
                     </div>
 

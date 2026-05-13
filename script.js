@@ -247,7 +247,10 @@ function getOpenStatus(openTime, closeTime) {
 
 // ─── Place card ───────────────────────────────
 async function createPlaceCard(place, index, user) {
-    const imageUrl = place.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80';
+    const imageUrl = place.image_url 
+        || place.image 
+        || 'https://via.placeholder.com/300x200?text=' 
+        + encodeURIComponent(place.name || 'Food Spot');
 
     let distVal = null;
     let distLabel = 'Distance unknown';
@@ -293,8 +296,9 @@ async function createPlaceCard(place, index, user) {
             <div class="place-info">
                 <h4 class="place-name">${place.name}</h4>
                 <p class="place-location">📍 ${place.location || 'Location not added'}</p>
-                <span class="place-popular">🍽️ Type: ${place.food_type || 'General'}</span>
-                <p class="place-description">🥘 Foods: ${place.foods_available || 'Not added'}</p>
+                ${place.food_type ? '<span class="food-type-badge">' + place.food_type + '</span>' : ''}
+                ${place.description ? '<p class="place-description">' + place.description + '</p>' : ''}
+                ${place.foods_available ? '<p class="place-foods">Foods: ' + place.foods_available + '</p>' : ''}
                 ${hoursHtml}
                 <p class="place-price price-range-badge">₹${place.min_price} – ₹${place.max_price || 'N/A'}</p>
                 <div class="rating-display">
@@ -447,12 +451,12 @@ async function openSpotDetail(id) {
         <div class="detail-body">
             <h2 class="detail-title">${place.name}</h2>
             <p class="detail-row">📍 <strong>Location:</strong> ${place.location || 'N/A'}</p>
-            <p class="detail-row">🍽️ <strong>Type:</strong> ${place.food_type || 'N/A'}</p>
-            <p class="detail-row">🥘 <strong>Foods:</strong> ${place.foods_available || 'N/A'}</p>
+            ${place.food_type ? '<span class="food-type-badge">' + place.food_type + '</span>' : ''}
+            ${place.description ? '<p class="place-description">' + place.description + '</p>' : ''}
+            ${place.foods_available ? '<p class="place-foods">Foods: ' + place.foods_available + '</p>' : ''}
             <p class="detail-row">💰 <strong>Price:</strong> ₹${place.min_price} – ₹${place.max_price || 'N/A'}</p>
             ${hoursHtml}
             <p class="detail-row">📏 <strong>Distance from you:</strong> ${distLabel}</p>
-            <p class="detail-row">📝 ${place.description || ''}</p>
             <p class="detail-row">🙋 <strong>Added by:</strong> ${place.added_by || 'Anonymous'}</p>
 
             <div class="detail-actions">
@@ -607,13 +611,11 @@ document.getElementById('add-place-form')?.addEventListener('submit', async (e) 
 
     if (!nameInput.value.trim()) showError(nameInput, 'Name cannot be empty');
     if (!locationInput.value.trim()) showError(locationInput, 'Location cannot be empty');
-    if (!foodsInput.value.trim()) showError(foodsInput, 'Foods available cannot be empty');
 
     const minPrice = parseInt(minPriceInput.value);
     const maxPrice = parseInt(maxPriceInput.value);
     if (isNaN(minPrice) || minPrice <= 0) showError(minPriceInput, 'Min price must be > 0');
     if (isNaN(maxPrice) || maxPrice <= minPrice) showError(maxPriceInput, 'Max price must be > min price');
-    if (!descInput.value.trim() || descInput.value.trim().length < 5) showError(descInput, 'Description must be at least 5 characters');
 
     const latVal = document.getElementById('spot-lat').value;
     const lngVal = document.getElementById('spot-lng').value;
@@ -627,33 +629,49 @@ document.getElementById('add-place-form')?.addEventListener('submit', async (e) 
 
     // Image upload
     let imageUrl = null;
-    const imageFile = document.getElementById('spot-image').files[0];
+    const imageFile = document.getElementById('spot-image-input').files[0];
     if (imageFile) {
         const submitBtn = e.target.querySelector('button[type="submit"]');
         submitBtn.textContent = '⏳ Uploading image…';
         submitBtn.disabled = true;
-        imageUrl = await uploadSpotImage(imageFile, nameInput.value);
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + fileExt;
+        const { data: uploadData, error: uploadError } = await db
+            .storage
+            .from('spot-images')
+            .upload(fileName, imageFile, { upsert: true });
+        if (!uploadError) {
+            const { data: urlData } = db.storage.from('spot-images').getPublicUrl(fileName);
+            imageUrl = urlData.publicUrl;
+        } else {
+            showToast('Image upload failed, submitting without photo.');
+        }
         submitBtn.disabled = false;
         submitBtn.textContent = editingSpotId ? '✏️ Update Place' : 'Submit';
     }
 
+    const foodTypeSelect = document.getElementById('food-type-input');
+    const foodType = foodTypeSelect.value === 'other'
+        ? document.getElementById('food-type-other').value.trim()
+        : foodTypeSelect.value;
+
     const spotData = {
         name: nameInput.value.trim(),
         location: locationInput.value.trim(),
-        food_type: document.getElementById('food-type-input').value,
-        foods_available: foodsInput.value.trim(),
+        food_type: foodType || null,
+        foods_available: foodsInput.value.trim() || null,
         min_price: minPrice,
         max_price: maxPrice,
         lat: parseFloat(document.getElementById('spot-lat').value) || null,
         lng: parseFloat(document.getElementById('spot-lng').value) || null,
         open_time: document.getElementById('open-time').value || null,
         close_time: document.getElementById('close-time').value || null,
-        description: descInput.value.trim(),
+        description: descInput.value.trim() || null,
         section: 'meals-100',
         user_id: user.id,
         added_by: user.email,
+        image_url: imageUrl || null
     };
-    if (imageUrl) spotData.image_url = imageUrl;
 
     let error;
     if (editingSpotId) {
@@ -670,7 +688,12 @@ document.getElementById('add-place-form')?.addEventListener('submit', async (e) 
     e.target.reset();
     document.getElementById('location-search').value = '';
     document.getElementById('location-suggestions').innerHTML = '';
-    removeImage();
+    document.getElementById('food-type-other').style.display = 'none';
+    document.getElementById('food-type-other').required = false;
+    document.getElementById('spot-image-input').value = '';
+    document.getElementById('image-preview').style.display = 'none';
+    document.getElementById('upload-placeholder').style.display = 'flex';
+    document.getElementById('remove-image-btn').style.display = 'none';
     document.getElementById('picked-location-display').textContent = '';
     const submitBtn = e.target.querySelector('button[type="submit"]');
     submitBtn.textContent = 'Submit';
@@ -849,3 +872,54 @@ function showToast(msg) {
     toast.classList.add('toast-visible');
     setTimeout(() => toast.classList.remove('toast-visible'), 2500);
 }
+
+document.getElementById('food-type-input')?.addEventListener('change', function() {
+    const otherInput = document.getElementById('food-type-other');
+    if (this.value === 'other') {
+        otherInput.style.display = 'block';
+        otherInput.required = true;
+    } else {
+        otherInput.style.display = 'none';
+        otherInput.required = false;
+        otherInput.value = '';
+    }
+});
+
+document.getElementById('spot-image-input')?.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Image must be under 5MB');
+        this.value = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = document.getElementById('image-preview');
+        const placeholder = document.getElementById('upload-placeholder');
+        const removeBtn = document.getElementById('remove-image-btn');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+        removeBtn.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+
+document.getElementById('remove-image-btn')?.addEventListener('click', () => {
+    document.getElementById('spot-image-input').value = '';
+    document.getElementById('image-preview').style.display = 'none';
+    document.getElementById('upload-placeholder').style.display = 'flex';
+    document.getElementById('remove-image-btn').style.display = 'none';
+});
+
+document.getElementById('description')?.addEventListener('input', function() {
+    const counter = document.getElementById('desc-counter');
+    if (counter) {
+        counter.textContent = this.value.length + '/150';
+        counter.style.color = this.value.length > 130 ? '#ef4444' : '#94a3b8';
+    }
+    if (this.value.length > 150) {
+        this.value = this.value.slice(0, 150);
+    }
+});
